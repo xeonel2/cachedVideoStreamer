@@ -9,16 +9,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import xyz.xeonel.cachedvideostreamer.R
-import xyz.xeonel.cachedvideostreamer.view.VideoHoldingFrame
+import xyz.xeonel.cachedvideostreamer.view.VideoViewHolder
 import xyz.xeonel.cachedvideostreamer.model.VideoData
 
 
-class VideoStreamAdapter ( val context: Context) : RecyclerView.Adapter<VideoHoldingFrame>() {
+class VideoStreamAdapter ( val context: Context) : RecyclerView.Adapter<VideoViewHolder>() {
 
     //define model (video data)
     val videoData = VideoData()
@@ -32,14 +31,14 @@ class VideoStreamAdapter ( val context: Context) : RecyclerView.Adapter<VideoHol
         return videoData.videoURLs.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoHoldingFrame {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
         // Initialize Exoplayer
         Log.v("VideoStreamAdapter","onCreateViewHolder");
-        return VideoHoldingFrame(LayoutInflater.from(context).inflate(R.layout.video_list_item, parent, false))
+        return VideoViewHolder(LayoutInflater.from(context).inflate(R.layout.video_list_item, parent, false))
 
     }
 
-    override fun onBindViewHolder(holder: VideoHoldingFrame, position: Int) {
+    override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val player = ExoPlayerFactory.newSimpleInstance(context, DefaultRenderersFactory(context), DefaultTrackSelector(), DefaultLoadControl())
         holder.exoVideoView?.player = player
         val videoSource = ProgressiveMediaSource
