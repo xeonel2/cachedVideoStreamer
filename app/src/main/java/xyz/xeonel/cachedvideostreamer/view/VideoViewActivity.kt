@@ -1,9 +1,10 @@
-package xyz.xeonel.cachedvideostreamer
+package xyz.xeonel.cachedvideostreamer.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import xyz.xeonel.cachedvideostreamer.R
 
-class MainActivity : AppCompatActivity() {
+class VideoViewActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
