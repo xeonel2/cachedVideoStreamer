@@ -1,0 +1,2 @@
+rootProject.name='CachedVideoStreamer'
+include ':app'
