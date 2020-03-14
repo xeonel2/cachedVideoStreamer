@@ -15,12 +15,15 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
-import xyz.xeonel.cachedvideostreamer.viewmodel.PlaybackHandler
+import xyz.xeonel.cachedvideostreamer.handlers.PlaybackHandler
+import xyz.xeonel.cachedvideostreamer.view.ViewCallbacks
 import java.io.File
+import javax.security.auth.callback.CallbackHandler
 
 class VideoData(context: Context) {
     // List of URLs that will be streamed or cached for viewing
     public val videoURLs: ArrayList<String> = ArrayList()
+    // Map that contains Exoplayer objects with respect to the position.
     private val playerMap =  HashMap<Int,Player>()
 
 
@@ -28,8 +31,8 @@ class VideoData(context: Context) {
     private val trackSelector = DefaultTrackSelector()
     private val loadControl = DefaultLoadControl()
     private val userAgent : String = "ExoVideoStreamer";
-    private val cacheFolder = File(context.filesDir, "media")
-    private val cacheEvictor = LeastRecentlyUsedCacheEvictor(30 * 1024 * 1024)
+    private val cacheFolder = File(context.filesDir, "media")   // Using filesDir instead of cacheDir because Videos are usually large
+    private val cacheEvictor = LeastRecentlyUsedCacheEvictor(100 * 1024 * 1024) // 100MB given for cache
     private val databaseProvider: DatabaseProvider = ExoDatabaseProvider(context)
     private val cache = SimpleCache(cacheFolder, cacheEvictor,databaseProvider)
     private val cacheDataSourceFactory = CacheDataSourceFactory(cache, DefaultHttpDataSourceFactory(userAgent))
@@ -57,12 +60,14 @@ class VideoData(context: Context) {
         setURLs()
     }
 
+    // To be used when the list of URLs are refreshed so new videos will be loaded in the map
     private fun clearPlayerMapping() {
         playerMap.clear()
     }
 
 
-    public fun provisionStream(context: Context, position: Int) : Player? {
+    //This either creates or returns a stream which is already created for a particular position
+    public fun provisionStream(context: Context, position: Int, viewCallbacks: ViewCallbacks) : Player? {
         if (playerMap.containsKey(position)) {
             return playerMap[position]
         }
@@ -75,7 +80,7 @@ class VideoData(context: Context) {
             .createMediaSource(Uri.parse(videoURLs[position]))
         Log.v("VideoStream","provisionStream: " + videoURLs[position]);
         player.prepare(videoSource)
-        player.addListener(PlaybackHandler())
+        player.addListener(PlaybackHandler(viewCallbacks))
         playerMap[position] = player
         return player
     }
