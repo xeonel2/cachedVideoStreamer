@@ -3,13 +3,11 @@ package xyz.xeonel.cachedvideostreamer.view
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.SnapHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import xyz.xeonel.cachedvideostreamer.R
-import xyz.xeonel.cachedvideostreamer.databinding.VideoListItemBinding
 import xyz.xeonel.cachedvideostreamer.viewmodel.VideoStreamAdapter
 
 
