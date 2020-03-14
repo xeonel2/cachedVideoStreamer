@@ -19,7 +19,9 @@ import java.io.File
 
 class VideoData(context: Context) {
     // List of URLs that will be streamed or cached for viewing
-    public val videoURLs: ArrayList<String> = ArrayList();
+    public val videoURLs: ArrayList<String> = ArrayList()
+    private val playerMap =  HashMap<Int,Player>()
+
     private val renderersFactory = DefaultRenderersFactory(context.applicationContext)
     private val trackSelector = DefaultTrackSelector()
     private val loadControl = DefaultLoadControl()
@@ -49,13 +51,21 @@ class VideoData(context: Context) {
         setURLs()
     }
 
-    public fun provisionStream(context: Context, position: Int) : Player {
+
+    public fun provisionStream(context: Context, position: Int) : Player? {
+        if (playerMap.containsKey(position)) {
+            return playerMap[position]
+        }
+        if (position > videoURLs.size - 1) {
+            return null
+        }
         val player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl)
         val videoSource = ProgressiveMediaSource
             .Factory(cacheDataSourceFactory)
             .createMediaSource(Uri.parse(videoURLs[position]))
         Log.v("VideoStream","provisionStream: " + videoURLs[position]);
         player.prepare(videoSource)
+        playerMap[position] = player
         return player
     }
 }
