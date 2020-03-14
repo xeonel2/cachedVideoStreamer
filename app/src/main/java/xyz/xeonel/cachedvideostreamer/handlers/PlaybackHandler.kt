@@ -1,7 +1,6 @@
 package xyz.xeonel.cachedvideostreamer.handlers
 
 import android.util.Log
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.Player
 import xyz.xeonel.cachedvideostreamer.view.ViewCallbacks
 

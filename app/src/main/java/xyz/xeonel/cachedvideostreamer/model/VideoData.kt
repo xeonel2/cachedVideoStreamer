@@ -18,7 +18,6 @@ import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import xyz.xeonel.cachedvideostreamer.handlers.PlaybackHandler
 import xyz.xeonel.cachedvideostreamer.view.ViewCallbacks
 import java.io.File
-import javax.security.auth.callback.CallbackHandler
 
 class VideoData(context: Context) {
     // List of URLs that will be streamed or cached for viewing
