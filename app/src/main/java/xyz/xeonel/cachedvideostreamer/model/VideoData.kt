@@ -15,12 +15,14 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
+import xyz.xeonel.cachedvideostreamer.viewmodel.PlaybackHandler
 import java.io.File
 
 class VideoData(context: Context) {
     // List of URLs that will be streamed or cached for viewing
     public val videoURLs: ArrayList<String> = ArrayList()
     private val playerMap =  HashMap<Int,Player>()
+
 
     private val renderersFactory = DefaultRenderersFactory(context.applicationContext)
     private val trackSelector = DefaultTrackSelector()
@@ -46,9 +48,17 @@ class VideoData(context: Context) {
         videoURLs.add("https://cdn.trell.co/h_640,w_640/user-videos/videos/orig/fDkn4hLtkApjqyVq6vEItYKUcr8Kgxlf.mp4");
     }
 
+    public fun getPlayerMap() : HashMap<Int,Player> {
+        return playerMap
+    }
+
     public fun initializeModel() {
         Log.v("VideoData","Initializing model");
         setURLs()
+    }
+
+    private fun clearPlayerMapping() {
+        playerMap.clear()
     }
 
 
@@ -65,6 +75,7 @@ class VideoData(context: Context) {
             .createMediaSource(Uri.parse(videoURLs[position]))
         Log.v("VideoStream","provisionStream: " + videoURLs[position]);
         player.prepare(videoSource)
+        player.addListener(PlaybackHandler())
         playerMap[position] = player
         return player
     }

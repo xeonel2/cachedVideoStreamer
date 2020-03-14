@@ -31,12 +31,23 @@ class VideoStreamAdapter ( val context: Context) : RecyclerView.Adapter<VideoVie
 
     }
 
+    override fun onViewAttachedToWindow(holder: VideoViewHolder) {
+
+        holder.exoVideoView?.player?.playWhenReady = true
+//        PlaybackHandler.stopOtherPlayback(videoData, position)
+    }
+
+    override fun onViewDetachedFromWindow(holder: VideoViewHolder) {
+        holder.exoVideoView?.player?.playWhenReady = false
+//        PlaybackHandler.stopOtherPlayback(videoData, position)
+    }
+
+
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val player : Player? = videoData.provisionStream(context, position)
         if (player != null) {
             videoData.provisionStream(context, position + 1)
             holder.exoVideoView?.player = player
-            player.playWhenReady = true
         }
     }
 
