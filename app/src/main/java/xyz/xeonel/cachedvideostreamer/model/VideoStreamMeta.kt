@@ -1,5 +1,7 @@
 package xyz.xeonel.cachedvideostreamer.model
 
-class VideoStreamMeta (var url: String){
+import xyz.xeonel.cachedvideostreamer.handler.PlaybackHandler
+
+class VideoStreamMeta (var url: String, var playbackHandler: PlaybackHandler){
 
 }
