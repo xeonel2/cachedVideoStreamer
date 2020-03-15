@@ -3,38 +3,27 @@ package xyz.xeonel.cachedvideostreamer.model
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import com.google.android.exoplayer2.DefaultLoadControl
-import com.google.android.exoplayer2.DefaultRenderersFactory
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.database.DatabaseProvider
 import com.google.android.exoplayer2.database.ExoDatabaseProvider
+import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
-import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
-import com.google.android.exoplayer2.upstream.cache.SimpleCache
-import xyz.xeonel.cachedvideostreamer.handlers.PlaybackHandler
-import xyz.xeonel.cachedvideostreamer.view.ViewCallbacks
+import com.google.android.exoplayer2.upstream.cache.*
 import java.io.File
 
-class VideoData(context: Context) {
+class VideoRepository() {
+
     // List of URLs that will be streamed or cached for viewing
     public val videoURLs: ArrayList<String> = ArrayList()
     // Map that contains Exoplayer objects with respect to the position.
-    private val playerMap =  HashMap<Int,Player>()
+    private val mediaSourceMap =  HashMap<Int,MediaSource>()
 
-
-    private val renderersFactory = DefaultRenderersFactory(context.applicationContext)
-    private val trackSelector = DefaultTrackSelector()
-    private val loadControl = DefaultLoadControl()
     private val userAgent : String = "ExoVideoStreamer";
-    private val cacheFolder = File(context.filesDir, "media")   // Using filesDir instead of cacheDir because Videos are usually large
-    private val cacheEvictor = LeastRecentlyUsedCacheEvictor(100 * 1024 * 1024) // 100MB given for cache
-    private val databaseProvider: DatabaseProvider = ExoDatabaseProvider(context)
-    private val cache = SimpleCache(cacheFolder, cacheEvictor,databaseProvider)
-    private val cacheDataSourceFactory = CacheDataSourceFactory(cache, DefaultHttpDataSourceFactory(userAgent))
+    private lateinit var cacheFolder : File
+    private lateinit var cacheEvictor : CacheEvictor
+    private lateinit var databaseProvider: DatabaseProvider
+    private lateinit var cache : Cache
+    private lateinit var cacheDataSourceFactory : CacheDataSourceFactory
 
     // Load URLs into the list to be prepared for streaming
     private fun setURLs() {
@@ -50,37 +39,48 @@ class VideoData(context: Context) {
         videoURLs.add("https://cdn.trell.co/h_640,w_640/user-videos/videos/orig/fDkn4hLtkApjqyVq6vEItYKUcr8Kgxlf.mp4");
     }
 
-    public fun getPlayerMap() : HashMap<Int,Player> {
-        return playerMap
+    public fun getMediaSourceMap() : HashMap<Int,MediaSource> {
+        return mediaSourceMap
     }
 
-    public fun initializeModel() {
+    public fun initializeModel(context: Context) {
         Log.v("VideoData","Initializing model");
         setURLs()
+        cacheFolder = File(context.filesDir, "media") // Using filesDir instead of cacheDir because Videos are usually large
+        cacheEvictor = LeastRecentlyUsedCacheEvictor(100 * 1024 * 1024) // 100MB given for cache
+        databaseProvider = ExoDatabaseProvider(context)
+        cache = SimpleCache(cacheFolder, cacheEvictor,databaseProvider)
+        cacheDataSourceFactory = CacheDataSourceFactory(cache, DefaultHttpDataSourceFactory(userAgent))
     }
 
     // To be used when the list of URLs are refreshed so new videos will be loaded in the map
-    private fun clearPlayerMapping() {
-        playerMap.clear()
+    private fun clearMediaSourceMapping() {
+        mediaSourceMap.clear()
     }
 
 
-    //This either creates or returns a stream which is already created for a particular position
-    public fun provisionStream(context: Context, position: Int, viewCallbacks: ViewCallbacks) : Player? {
-        if (playerMap.containsKey(position)) {
-            return playerMap[position]
+    // This either creates or returns a stream which is already created for a particular position
+    public fun provisionStream(position: Int) : MediaSource? {
+        if (mediaSourceMap.containsKey(position)) {
+            return mediaSourceMap[position]
         }
         if (position > videoURLs.size - 1) {
             return null
         }
-        val player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl)
         val videoSource = ProgressiveMediaSource
             .Factory(cacheDataSourceFactory)
             .createMediaSource(Uri.parse(videoURLs[position]))
-        Log.v("VideoStream","provisionStream: " + videoURLs[position]);
-        player.prepare(videoSource)
-        player.addListener(PlaybackHandler(viewCallbacks))
-        playerMap[position] = player
-        return player
+
+        mediaSourceMap[position] = videoSource
+        return videoSource
+    }
+
+    // Making repository a singleton class
+    companion object{
+        @Volatile private var instance: VideoRepository? = null
+
+        fun getInstance() = instance ?: synchronized(this) {
+            instance ?: VideoRepository().also { instance = it }
+        }
     }
 }

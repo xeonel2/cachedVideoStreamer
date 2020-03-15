@@ -4,9 +4,15 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.exoplayer2.DefaultLoadControl
+import com.google.android.exoplayer2.DefaultRenderersFactory
+import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import xyz.xeonel.cachedvideostreamer.R
-import xyz.xeonel.cachedvideostreamer.model.VideoData
+import xyz.xeonel.cachedvideostreamer.model.VideoRepository
 import xyz.xeonel.cachedvideostreamer.view.VideoViewHolder
 import xyz.xeonel.cachedvideostreamer.view.ViewCallbacks
 
@@ -14,15 +20,19 @@ import xyz.xeonel.cachedvideostreamer.view.ViewCallbacks
 class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
+    private val renderersFactory = DefaultRenderersFactory(context.applicationContext)
+    private val trackSelector = DefaultTrackSelector()
+    private val loadControl = DefaultLoadControl()
+
     //define model (video data)
-    private val videoData = VideoData(context)
+    private val videoData = VideoRepository.getInstance()
 
     init {
-        videoData.initializeModel()
+        VideoRepository.getInstance().initializeModel(context)
     }
 
     override fun getItemCount(): Int {
-        return videoData.videoURLs.size
+        return VideoRepository.getInstance().videoURLs.size
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -46,13 +56,18 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
 
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
-        // Get the player from model
-        val player : Player? = videoData.provisionStream(context, position, ViewCallbacks(recyclerView))
-        // Provision(Cache) the next video stream
-        if (player != null) {
-            videoData.provisionStream(context, position + 1, ViewCallbacks(recyclerView))
-            holder.exoVideoView?.player = player
-        }
+
+        // Get Media sources current and next
+        val currentMediaSource : MediaSource? = VideoRepository.getInstance().provisionStream(position)
+        val nextMediaSource : MediaSource? = VideoRepository.getInstance().provisionStream(position + 1)
+
+        // Create ExoPlayer
+        val player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl)
+        holder.exoVideoView?.player = player
+
+        // Prepare current stream or next stream also if next item exists
+        if (nextMediaSource != null) player.prepare(ConcatenatingMediaSource(currentMediaSource, nextMediaSource))
+        else player.prepare(currentMediaSource)
     }
 
 }

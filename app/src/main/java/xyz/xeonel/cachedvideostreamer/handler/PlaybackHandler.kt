@@ -1,4 +1,4 @@
-package xyz.xeonel.cachedvideostreamer.handlers
+package xyz.xeonel.cachedvideostreamer.handler
 
 import android.util.Log
 import com.google.android.exoplayer2.Player
