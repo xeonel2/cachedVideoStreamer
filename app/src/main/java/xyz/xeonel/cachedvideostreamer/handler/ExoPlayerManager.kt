@@ -20,8 +20,10 @@ class ExoPlayerManager {
         renderersFactory = DefaultRenderersFactory(context.applicationContext)
         trackSelector = DefaultTrackSelector()
         loadControl = DefaultLoadControl()
+
+        val playerCount = if (numberOFPlayers < 2) 2 else numberOFPlayers
         // Create players and add to available players
-        for (x in 1..numberOFPlayers) {
+        for (x in 1..playerCount) {
             availablePlayers.add(
                 ExoPlayerFactory.newSimpleInstance(
                     context,

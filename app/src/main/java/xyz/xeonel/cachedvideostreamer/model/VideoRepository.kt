@@ -54,7 +54,7 @@ class VideoRepository() {
         cacheDataSourceFactory = CacheDataSourceFactory(cache, DefaultHttpDataSourceFactory(userAgent))
     }
 
-    // To be used when the list of URLs are refreshed so new videos will be loaded in the map
+    // release MediaSource when ViewHolder recycled
     public fun clearMediaSourceMapping(videoStreamMeta: VideoStreamMeta) {
         for (k in mediaSourceMap.keys) {
             mediaSourceMap[k]?.releaseSource(null)

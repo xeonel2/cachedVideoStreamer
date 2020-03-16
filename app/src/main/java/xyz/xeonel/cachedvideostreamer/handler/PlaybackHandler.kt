@@ -18,7 +18,7 @@ class PlaybackHandler(val viewCallbacks: ViewCallbacks) : Player.EventListener{
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         if (isPlaying) {
-            // Prepare next player
+            // Video started playing, Prepare next player
             ExoPlayerManager.getInstance().preparePlayerForURL(viewCallbacks.nextURL)
             Log.v("VideoStream", "Preparing next video")
         }
