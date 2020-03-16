@@ -11,17 +11,35 @@ class ExoPlayerManager {
     private lateinit var renderersFactory : RenderersFactory
     private lateinit var trackSelector : TrackSelector
     private lateinit var loadControl : LoadControl
-    private lateinit var player : ExoPlayer
+    val availablePlayers: MutableSet<ExoPlayer> = mutableSetOf()
 
-    public fun initializePlayer(context: Context) {
+    public fun initializePlayerManager(context: Context, numberOFPlayers: Int) {
         renderersFactory = DefaultRenderersFactory(context.applicationContext)
         trackSelector = DefaultTrackSelector()
         loadControl = DefaultLoadControl()
-        player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl)
+        // Create players and add to available players
+        for (x in 1..numberOFPlayers) {
+            availablePlayers.add(
+                ExoPlayerFactory.newSimpleInstance(
+                    context,
+                    renderersFactory,
+                    trackSelector,
+                    loadControl
+                )
+            )
+        }
     }
 
-    public fun getPlayer() : ExoPlayer {
+    public fun getFreePlayer() : ExoPlayer? {
+        val player = availablePlayers.lastOrNull()
+        if (player != null){
+            availablePlayers.remove(player)
+        }
         return player
+    }
+
+    fun playerAvailable(exoPlayer: ExoPlayer) {
+        availablePlayers.add(exoPlayer)
     }
 
     // Making ExoplayerManager singleton

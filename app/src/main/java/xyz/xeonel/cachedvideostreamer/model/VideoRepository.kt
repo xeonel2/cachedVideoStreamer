@@ -55,7 +55,7 @@ class VideoRepository() {
 
     // To be used when the list of URLs are refreshed so new videos will be loaded in the map
     public fun clearMediaSourceMapping(videoStreamMeta: VideoStreamMeta) {
-        for ((k,v) in mediaSourceMap) {
+        for (k in mediaSourceMap.keys) {
             mediaSourceMap[k]?.releaseSource(null)
         }
         mediaSourceMap.clear()

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
+import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.SnapHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import xyz.xeonel.cachedvideostreamer.R
@@ -17,8 +18,12 @@ class VideoViewActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //Snap to video views when scrolling
-        val snapHelper: SnapHelper = LinearSnapHelper()
+//        val snapHelper: SnapHelper = LinearSnapHelper()
+//        snapHelper.attachToRecyclerView(mainRecyclerView)
+
+        val snapHelper: PagerSnapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(mainRecyclerView)
+
         //Vertical layout
         mainRecyclerView.layoutManager = LinearLayoutManager(this)
         mainRecyclerView.adapter =
