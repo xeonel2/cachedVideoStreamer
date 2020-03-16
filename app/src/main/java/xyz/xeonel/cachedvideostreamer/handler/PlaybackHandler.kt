@@ -1,4 +1,4 @@
-package xyz.xeonel.cachedvideostreamer.handlers
+package xyz.xeonel.cachedvideostreamer.handler
 
 import android.util.Log
 import com.google.android.exoplayer2.Player
@@ -13,6 +13,14 @@ class PlaybackHandler(val viewCallbacks: ViewCallbacks) : Player.EventListener{
             Log.v("VideoStream", "Video Ended")
             //Go to next video
             viewCallbacks.scrollNext()
+        }
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        if (isPlaying) {
+            // Video started playing, Prepare next player
+            ExoPlayerManager.getInstance().preparePlayerForURL(viewCallbacks.nextURL)
+            Log.v("VideoStream", "Preparing next video")
         }
     }
 
