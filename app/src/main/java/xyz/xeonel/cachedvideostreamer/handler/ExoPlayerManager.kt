@@ -6,7 +6,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelector
 import xyz.xeonel.cachedvideostreamer.model.VideoRepository
 
-// Manages a single instance of exoplayer
+// Manages exoplayer instances
 class ExoPlayerManager {
 
     private lateinit var renderersFactory : RenderersFactory
@@ -33,6 +33,7 @@ class ExoPlayerManager {
         }
     }
 
+    // Return an available Exoplayer from the available pool
     private fun getFreePlayer() : ExoPlayer? {
         val player = availablePlayers.lastOrNull()
         if (player != null){
@@ -41,8 +42,10 @@ class ExoPlayerManager {
         return player
     }
 
+    // Return a prepared player for the URL
     public fun getPlayerForURL(url: String) : ExoPlayer? {
         if (url == preparedURL) {
+            // If the URL is already prepared for playing
             return nextPlayer
         }
 
@@ -51,6 +54,7 @@ class ExoPlayerManager {
         return player
     }
 
+    // Prepare the URL for playing next
     public fun preparePlayerForURL(url: String?) {
         if (url !=null && preparedURL != url) {
             val player = getFreePlayer() ?: return
@@ -62,6 +66,7 @@ class ExoPlayerManager {
         return
     }
 
+    // Player not attached to any ViewHolder. Added back to available pool
     fun playerAvailable(exoPlayer: ExoPlayer) {
         availablePlayers.add(exoPlayer)
     }

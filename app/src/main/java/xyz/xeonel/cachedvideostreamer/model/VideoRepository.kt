@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.*
+import xyz.xeonel.cachedvideostreamer.config.ApplicationConfig
 import java.io.File
 
 class VideoRepository() {
@@ -47,7 +48,7 @@ class VideoRepository() {
         Log.v("VideoData","Initializing model");
         setURLs()
         cacheFolder = File(context.filesDir, "media") // Using filesDir instead of cacheDir because Videos are usually large
-        cacheEvictor = LeastRecentlyUsedCacheEvictor(100 * 1024 * 1024) // 100MB given for cache
+        cacheEvictor = LeastRecentlyUsedCacheEvictor(ApplicationConfig.cacheSizeMB * 1024 * 1024) // 100MB given for cache
         databaseProvider = ExoDatabaseProvider(context)
         cache = SimpleCache(cacheFolder, cacheEvictor,databaseProvider)
         cacheDataSourceFactory = CacheDataSourceFactory(cache, DefaultHttpDataSourceFactory(userAgent))

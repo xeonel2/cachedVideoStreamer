@@ -8,7 +8,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_ENDED
-import com.google.android.exoplayer2.source.MediaSource
 import xyz.xeonel.cachedvideostreamer.R
 import xyz.xeonel.cachedvideostreamer.config.ApplicationConfig
 import xyz.xeonel.cachedvideostreamer.databinding.VideoListItemBinding
@@ -51,14 +50,16 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
         var player = holder.exoVideoView?.player as ExoPlayer?
 
         if (player == null) {
+            // Get player instance for the URL from Exoplayer manager
             player = ExoPlayerManager.getInstance().getPlayerForURL(holder.binding.videoStreamMeta!!.url)
-//            player?.prepare(VideoRepository.getInstance().provisionStream(holder.binding.videoStreamMeta!!.url))
             player?.addListener(holder.binding.videoStreamMeta!!.playbackHandler)
             holder.exoVideoView?.player = player
         } else if (player.playbackState == STATE_ENDED) {
+            // Player finished playing video but should start again
                 player.seekTo(0)
         }
 
+        // Start playing with video is buffered
         player?.playWhenReady = true
     }
 
@@ -66,7 +67,10 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
         //Stop the video which is not on screen
         val player = holder.exoVideoView?.player as ExoPlayer
         holder.exoVideoView?.player = null
+
+        // Pause playback
         player.playWhenReady = false
+
         // Remove listener attached to the player
         player.removeListener(holder.binding.videoStreamMeta!!.playbackHandler)
         //Release player to ExoPlayer manager
@@ -90,6 +94,8 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
                 )
             ))
         }
+
+        holder.binding.executePendingBindings()
 
         // Make sure mediaStream exists for fast loading with in user view
         videoRepository.provisionStream(videoRepository.videoURLs[position])
