@@ -56,17 +56,18 @@ class VideoRepository() {
 
     // release MediaSource when ViewHolder recycled
     public fun clearMediaSourceMapping(videoStreamMeta: VideoStreamMeta) {
+        if (mediaSourceMap.containsKey(videoStreamMeta.url)) {
+            mediaSourceMap[videoStreamMeta.url]?.releaseSource(null)
+        }
+    }
+
+    // Release all MediaSources
+    fun clearAllMediaSourceMappings() {
         for (k in mediaSourceMap.keys) {
             mediaSourceMap[k]?.releaseSource(null)
         }
         mediaSourceMap.clear()
-
-        if (mediaSourceMap.containsKey(videoStreamMeta.url)) {
-            mediaSourceMap[videoStreamMeta.url]?.releaseSource(null)
-        }
-
     }
-
 
     // This either creates or returns a stream which is already created for a particular position
     public fun provisionStream(url: String) : MediaSource? {
