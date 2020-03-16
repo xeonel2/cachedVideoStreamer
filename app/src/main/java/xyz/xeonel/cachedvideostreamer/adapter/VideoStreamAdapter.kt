@@ -1,19 +1,14 @@
-package xyz.xeonel.cachedvideostreamer.viewmodel
+package xyz.xeonel.cachedvideostreamer.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.exoplayer2.DefaultLoadControl
-import com.google.android.exoplayer2.DefaultRenderersFactory
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import xyz.xeonel.cachedvideostreamer.R
 import xyz.xeonel.cachedvideostreamer.databinding.VideoListItemBinding
+import xyz.xeonel.cachedvideostreamer.handler.ExoPlayerManager
 import xyz.xeonel.cachedvideostreamer.handler.PlaybackHandler
 import xyz.xeonel.cachedvideostreamer.model.VideoRepository
 import xyz.xeonel.cachedvideostreamer.model.VideoStreamMeta
@@ -24,15 +19,13 @@ import xyz.xeonel.cachedvideostreamer.view.ViewCallbacks
 class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
-    private val renderersFactory = DefaultRenderersFactory(context.applicationContext)
-    private val trackSelector = DefaultTrackSelector()
-    private val loadControl = DefaultLoadControl()
 
     //define model (video data)
-    private val videoData = VideoRepository.getInstance()
+    private val videoRepository = VideoRepository.getInstance()
 
     init {
         VideoRepository.getInstance().initializeModel(context)
+        ExoPlayerManager.getInstance().initializePlayer(context)
     }
 
     override fun getItemCount(): Int {
@@ -52,12 +45,17 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
 
     override fun onViewAttachedToWindow(holder: VideoViewHolder) {
         //Play the video on the screen
+        val player = ExoPlayerManager.getInstance().getPlayer()
+
+        player.prepare(VideoRepository.getInstance().provisionStream(holder.binding.videoStreamMeta!!.url))
+        player.addListener(holder.binding.videoStreamMeta!!.playbackHandler)
+        holder.exoVideoView?.player = player
         holder.exoVideoView?.player?.playWhenReady = true
     }
 
     override fun onViewDetachedFromWindow(holder: VideoViewHolder) {
         //Stop the video which is not on screen
-        holder.exoVideoView?.player?.playWhenReady = false
+//        holder.exoVideoView?.player?.playWhenReady = false
     }
 
     override fun onViewRecycled(holder: VideoViewHolder) {
@@ -69,25 +67,22 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
 
         holder.binding.run {
-            videoStreamMeta = VideoStreamMeta(VideoRepository.getInstance().videoURLs[position], PlaybackHandler(
+            videoStreamMeta = VideoStreamMeta(videoRepository.videoURLs[position], PlaybackHandler(
                 ViewCallbacks(recyclerView)
             ))
         }
         // Get Media sources current and next
-        val currentMediaSource : MediaSource? = VideoRepository.getInstance().provisionStream(VideoRepository.getInstance().videoURLs[position])
-        val nextMediaSource : MediaSource? = if (VideoRepository.getInstance().videoURLs.size - 1 > position)
-            VideoRepository.getInstance().provisionStream(VideoRepository.getInstance().videoURLs[position + 1])
+        val currentMediaSource : MediaSource? = videoRepository.provisionStream(videoRepository.videoURLs[position])
+        val nextMediaSource : MediaSource? = if (videoRepository.videoURLs.size - 1 > position)
+            videoRepository.provisionStream(videoRepository.videoURLs[position + 1])
             else null
 
-        // Create ExoPlayer
-        val player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl)
-        holder.exoVideoView?.player = player
 
         // Prepare current stream or next stream also if next item exists also trying out run xD
-        player.prepare(run{
-            if (nextMediaSource != null) ConcatenatingMediaSource(true, currentMediaSource, nextMediaSource)
-            else currentMediaSource
-        })
+//        player.prepare(run{
+//            if (nextMediaSource != null) ConcatenatingMediaSource(true, currentMediaSource, nextMediaSource)
+//            else currentMediaSource
+//        })
     }
 
 

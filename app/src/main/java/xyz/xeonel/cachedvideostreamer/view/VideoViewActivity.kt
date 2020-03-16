@@ -1,14 +1,13 @@
 package xyz.xeonel.cachedvideostreamer.view
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.SnapHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import xyz.xeonel.cachedvideostreamer.R
-import xyz.xeonel.cachedvideostreamer.viewmodel.VideoStreamAdapter
+import xyz.xeonel.cachedvideostreamer.adapter.VideoStreamAdapter
 
 
 class VideoViewActivity : AppCompatActivity() {
@@ -22,6 +21,7 @@ class VideoViewActivity : AppCompatActivity() {
         snapHelper.attachToRecyclerView(mainRecyclerView)
         //Vertical layout
         mainRecyclerView.layoutManager = LinearLayoutManager(this)
-        mainRecyclerView.adapter = VideoStreamAdapter(this)
+        mainRecyclerView.adapter =
+            VideoStreamAdapter(this)
     }
 }

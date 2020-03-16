@@ -1,4 +1,4 @@
-package xyz.xeonel.cachedvideostreamer.viewmodel
+package xyz.xeonel.cachedvideostreamer.adapter
 
 import android.util.Log
 import androidx.databinding.BindingAdapter
