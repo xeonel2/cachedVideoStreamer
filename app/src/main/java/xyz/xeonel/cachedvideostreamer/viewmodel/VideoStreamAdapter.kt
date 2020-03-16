@@ -1,6 +1,7 @@
 package xyz.xeonel.cachedvideostreamer.viewmodel
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -59,15 +60,24 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
         holder.exoVideoView?.player?.playWhenReady = false
     }
 
+    override fun onViewRecycled(holder: VideoViewHolder) {
+        // Release the mediaSource when the video holder gets recycled
+        VideoRepository.getInstance().clearMediaSourceMapping(holder.binding.videoStreamMeta!!)
+    }
+
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
 
         holder.binding.run {
-            videoStreamMeta = VideoStreamMeta(VideoRepository.getInstance().videoURLs[position], PlaybackHandler(ViewCallbacks(recyclerView)))
+            videoStreamMeta = VideoStreamMeta(VideoRepository.getInstance().videoURLs[position], PlaybackHandler(
+                ViewCallbacks(recyclerView)
+            ))
         }
         // Get Media sources current and next
-        val currentMediaSource : MediaSource? = VideoRepository.getInstance().provisionStream(position)
-        val nextMediaSource : MediaSource? = VideoRepository.getInstance().provisionStream(position + 1)
+        val currentMediaSource : MediaSource? = VideoRepository.getInstance().provisionStream(VideoRepository.getInstance().videoURLs[position])
+        val nextMediaSource : MediaSource? = if (VideoRepository.getInstance().videoURLs.size - 1 > position)
+            VideoRepository.getInstance().provisionStream(VideoRepository.getInstance().videoURLs[position + 1])
+            else null
 
         // Create ExoPlayer
         val player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl)
@@ -75,7 +85,7 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
 
         // Prepare current stream or next stream also if next item exists also trying out run xD
         player.prepare(run{
-            if (nextMediaSource != null) ConcatenatingMediaSource(currentMediaSource, nextMediaSource)
+            if (nextMediaSource != null) ConcatenatingMediaSource(true, currentMediaSource, nextMediaSource)
             else currentMediaSource
         })
     }

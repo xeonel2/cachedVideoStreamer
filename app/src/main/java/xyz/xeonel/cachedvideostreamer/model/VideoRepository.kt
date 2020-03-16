@@ -14,9 +14,9 @@ import java.io.File
 class VideoRepository() {
 
     // List of URLs that will be streamed or cached for viewing
-    public val videoURLs: ArrayList<String> = ArrayList()
-    // Map that contains Exoplayer objects with respect to the position.
-    private val mediaSourceMap =  HashMap<Int,MediaSource>()
+    public val videoURLs: MutableList<String> = mutableListOf<String>()
+    // Map that contains MediaSource objects with respect to the URL.
+    private val mediaSourceMap =  HashMap<String,MediaSource>()
 
     private val userAgent : String = "ExoVideoStreamer";
     private lateinit var cacheFolder : File
@@ -39,7 +39,7 @@ class VideoRepository() {
         videoURLs.add("https://cdn.trell.co/h_640,w_640/user-videos/videos/orig/fDkn4hLtkApjqyVq6vEItYKUcr8Kgxlf.mp4");
     }
 
-    public fun getMediaSourceMap() : HashMap<Int,MediaSource> {
+    public fun getMediaSourceMap() : HashMap<String,MediaSource> {
         return mediaSourceMap
     }
 
@@ -54,24 +54,32 @@ class VideoRepository() {
     }
 
     // To be used when the list of URLs are refreshed so new videos will be loaded in the map
-    private fun clearMediaSourceMapping() {
+    public fun clearMediaSourceMapping(videoStreamMeta: VideoStreamMeta) {
+        for ((k,v) in mediaSourceMap) {
+            mediaSourceMap[k]?.releaseSource(null)
+        }
         mediaSourceMap.clear()
+
+        if (mediaSourceMap.containsKey(videoStreamMeta.url)) {
+            mediaSourceMap[videoStreamMeta.url]?.releaseSource(null)
+        }
+
     }
 
 
     // This either creates or returns a stream which is already created for a particular position
-    public fun provisionStream(position: Int) : MediaSource? {
-        if (mediaSourceMap.containsKey(position)) {
-            return mediaSourceMap[position]
+    public fun provisionStream(url: String) : MediaSource? {
+        if (mediaSourceMap.containsKey(url)) {
+            return mediaSourceMap[url]
         }
-        if (position > videoURLs.size - 1) {
-            return null
-        }
+//        if (url > videoURLs.size - 1) {
+//            return null
+//        }
         val videoSource = ProgressiveMediaSource
             .Factory(cacheDataSourceFactory)
-            .createMediaSource(Uri.parse(videoURLs[position]))
+            .createMediaSource(Uri.parse(url))
 
-        mediaSourceMap[position] = videoSource
+        mediaSourceMap[url] = videoSource
         return videoSource
     }
 
