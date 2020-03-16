@@ -72,9 +72,7 @@ class VideoRepository() {
         if (mediaSourceMap.containsKey(url)) {
             return mediaSourceMap[url]
         }
-//        if (url > videoURLs.size - 1) {
-//            return null
-//        }
+
         val videoSource = ProgressiveMediaSource
             .Factory(cacheDataSourceFactory)
             .createMediaSource(Uri.parse(url))

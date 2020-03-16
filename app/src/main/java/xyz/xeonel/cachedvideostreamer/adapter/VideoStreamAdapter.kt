@@ -51,8 +51,8 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
         var player = holder.exoVideoView?.player as ExoPlayer?
 
         if (player == null) {
-            player = ExoPlayerManager.getInstance().getFreePlayer()
-            player?.prepare(VideoRepository.getInstance().provisionStream(holder.binding.videoStreamMeta!!.url))
+            player = ExoPlayerManager.getInstance().getPlayerForURL(holder.binding.videoStreamMeta!!.url)
+//            player?.prepare(VideoRepository.getInstance().provisionStream(holder.binding.videoStreamMeta!!.url))
             player?.addListener(holder.binding.videoStreamMeta!!.playbackHandler)
             holder.exoVideoView?.player = player
         } else if (player.playbackState == STATE_ENDED) {
@@ -84,14 +84,15 @@ class VideoStreamAdapter (val context: Context) : RecyclerView.Adapter<VideoView
 
         holder.binding.run {
             videoStreamMeta = VideoStreamMeta(videoRepository.videoURLs[position], PlaybackHandler(
-                ViewCallbacks(recyclerView)
+                ViewCallbacks(recyclerView,
+                    if (videoRepository.videoURLs.size - 1 > position) videoRepository.videoURLs[position + 1]
+                    else null
+                )
             ))
         }
-        // Get Media sources current and next
-        val currentMediaSource : MediaSource? = videoRepository.provisionStream(videoRepository.videoURLs[position])
-        val nextMediaSource : MediaSource? = if (videoRepository.videoURLs.size - 1 > position)
-            videoRepository.provisionStream(videoRepository.videoURLs[position + 1])
-            else null
+
+        // Make sure mediaStream exists for fast loading with in user view
+        videoRepository.provisionStream(videoRepository.videoURLs[position])
 
     }
 

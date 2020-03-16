@@ -4,7 +4,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 // Callback functions to be used by Handlers
-class ViewCallbacks(val recyclerView: RecyclerView) {
+class ViewCallbacks(val recyclerView: RecyclerView, val nextURL: String?) {
 
     //Scroll to the next item in the RecyclerView
     public fun scrollNext() {
